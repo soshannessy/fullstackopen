@@ -1,3 +1,16 @@
+const Course = ({course}) => {
+  console.log(course.parts)
+  console.log(course.name)
+  return (
+  <div>
+    <h1>{course.name}</h1>
+    <ul>
+      {course.parts.map(parts => <li>{parts.name} {parts.exercises}</li>)}
+    </ul>
+  </div>
+  )
+}
+
 const App = () => {
   const course = {
     id: 1,
