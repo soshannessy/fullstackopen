@@ -57,10 +57,12 @@ const App = () => {
     <div>
       <h2>Anecdote of the Day</h2>
       <p>{anecdotes[selected]}</p>
+      <p>{votes[selected]}</p>
       <Button handleClick={() => handleVote(selected)} text='Vote'/>
       <Button handleClick={handleRandomGen} text='Next Anecdote'/>
       <h2>Anecdote with the most votes</h2>
       <p>{anecdotes[maxVotesIndex]}</p>
+      <p>{votes[maxVotesIndex]}</p>
     </div>
   )
 }
