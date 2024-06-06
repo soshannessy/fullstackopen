@@ -3,16 +3,25 @@ import personService from './services/person';
 import PersonForm from './components/PersonForm';
 import Filter from './components/Filter';
 import Persons from './components/Persons';
+import Notification from './components/Notification';
+import './index.css';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [searchName, setSearchName] = useState('');
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     personService
       .getAll()
       .then(initialPersons => {
         setPersons(initialPersons);
+      })
+      .catch(error => {
+        setNotification({ message: 'Failed to fetch persons', type: 'error' });
+        setTimeout(() => {
+          setNotification(null);
+        }, 5000);
       });
   }, []);
 
@@ -29,6 +38,16 @@ const App = () => {
         .create(personObject)
         .then(newPerson => {
           setPersons(persons.concat(newPerson));
+          setNotification({ message: `Added ${newPerson.name}`, type: 'success' });
+          setTimeout(() => {
+            setNotification(null);
+          }, 5000);
+        })
+        .catch(error => {
+          setNotification({ message: 'Failed to add person', type: 'error' });
+          setTimeout(() => {
+            setNotification(null);
+          }, 5000);
         });
     }
   };
@@ -38,9 +57,16 @@ const App = () => {
       .remove(id)
       .then(() => {
         setPersons(persons.filter(person => person.id !== id));
+        setNotification({ message: 'Person deleted', type: 'success' });
+        setTimeout(() => {
+          setNotification(null);
+        }, 5000);
       })
       .catch(error => {
-        alert('The person was already removed from the server');
+        setNotification({ message: 'Person was already removed from server', type: 'error' });
+        setTimeout(() => {
+          setNotification(null);
+        }, 5000);
         setPersons(persons.filter(person => person.id !== id));
       });
   };
@@ -56,6 +82,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notification={notification} />
       <Filter value={searchName} onChange={handleSearchChange} />
       <h3>Add a new</h3>
       <PersonForm addPerson={addPerson} />
@@ -66,3 +93,4 @@ const App = () => {
 };
 
 export default App;
+

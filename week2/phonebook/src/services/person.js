@@ -17,7 +17,7 @@ const remove = id => {
   if (window.confirm('Do you want to delete this person?')) {
     return axios.delete(`${baseUrl}/${id}`).then(response => response.data);
   }
-  return Promise.resolve(); // Return a resolved promise if the user cancels
+  return Promise.resolve();
 };
 
 export default { getAll, create, update, remove };
