@@ -2,31 +2,29 @@ import React, { useState } from 'react';
 
 const PersonForm = ({ addPerson }) => {
   const [newName, setNewName] = useState('');
-  const [newPhone, setNewPhone] = useState('');
+  const [newNumber, setNewNumber] = useState('');
 
-  const handleNameChange = (event) => {
-    setNewName(event.target.value);
-  };
+  const handleNameChange = event => setNewName(event.target.value);
+  const handleNumberChange = event => setNewNumber(event.target.value);
 
-  const handlePhoneChange = (event) => {
-    setNewPhone(event.target.value);
-  };
-
-  const handleSubmit = (event) => {
+  const handleSubmit = event => {
     event.preventDefault();
-    addPerson(newName, newPhone);
+    addPerson(newName, newNumber);
     setNewName('');
-    setNewPhone('');
+    setNewNumber('');
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div>name: <input value={newName} onChange={handleNameChange} /></div>
-      <div>phone: <input value={newPhone} onChange={handlePhoneChange} /></div>
-      <div><button type="submit">add</button></div>
+      <div>
+        name: <input value={newName} onChange={handleNameChange} />
+      </div>
+      <div>
+        number: <input value={newNumber} onChange={handleNumberChange} />
+      </div>
+      <button type="submit">add</button>
     </form>
   );
 };
 
 export default PersonForm;
-
