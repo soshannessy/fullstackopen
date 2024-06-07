@@ -1,69 +1,59 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
+import axios from 'axios';
+import CountryList from './components/CountryList'
+import SingleCountryInfo from './components/SingleCountryInfo'
 
-function App() {
-  const [countryData, setCountryData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [message, setMessage] = useState('');
+
+const App = () => {
+  const [countries, setCountries] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const fetchCountryData = async () => {
-      try {
-        const response = await fetch('https://studies.cs.helsinki.fi/restcountries/api/' + {searchQuery});
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const data = await response.json();
-        setCountryData(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchCountryData();
+    axios.get('https://studies.cs.helsinki.fi/restcountries/api/all')
+      .then(response => {
+        const sortedCountries = response.data.sort((a, b) => {
+          if (a.name.common < b.name.common) return -1;
+          if (a.name.common > b.name.common) return 1;
+          return 0;
+        });
+        setCountries(sortedCountries);
+      })
+      .catch(error => {
+        console.error("Error fetching data: ", error);
+      });
   }, []);
 
-  useEffect(() => {
-    const filteredSuggestions = countryData
-      .filter((country) =>
-        country.name.toLowerCase().startsWith(searchQuery.toLowerCase())
-      )
-      .map((country) => country.name);
-
-    if (filteredSuggestions.length > 10) {
-      setMessage('Too many matches, specify another filter');
-      setSuggestions([]);
-    } else {
-      setMessage('');
-      setSuggestions(filteredSuggestions);
-    }
-  }, [searchQuery, countryData]);
-
   const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
+    setSearchTerm(event.target.value);
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion);
-    setSuggestions([]);
-  };
+  const filteredCountries = countries.filter(country =>
+    country.name.common.toLowerCase().startsWith(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
-      <input type="text" value={searchQuery} onChange={handleSearchChange} />
-      <ul>
-        {message && <li>{message}</li>}
-        {suggestions.map((suggestion, index) => (
-          <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
-            {suggestion}
-          </li>
-        ))}
-      </ul>
-      {countryData}
+      <input
+        type="text"
+        placeholder="Search countries..."
+        value={searchTerm}
+        onChange={handleSearchChange}
+      />
+      {searchTerm.length > 0 && (
+        filteredCountries.length > 10 ? (
+          <div>Too many countries, specify another filter</div>
+        ) : filteredCountries.length === 1 ? (
+          <SingleCountryInfo country={filteredCountries[0]} />
+        ) : (
+          <CountryList countries={filteredCountries} />
+        )
+      )}
     </div>
   );
 }
 
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+
 export default App;
-
-

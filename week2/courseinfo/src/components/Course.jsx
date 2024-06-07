@@ -7,10 +7,8 @@ const Course = ({ courses }) => {
           return (
             <div key={course.id}>
               <h2>{course.name}</h2>
-              <ul>
-                {course.parts.map(part => <li key={part.id}>{part.name} {part.exercises}</li>)}
-              </ul>
-              <h2>total of {total} exercises</h2>
+              {course.parts.map(part => <p key={part.id}>{part.name} {part.exercises}</p>)}
+              <h3>total of {total} exercises</h3>
             </div>
           );
         })}

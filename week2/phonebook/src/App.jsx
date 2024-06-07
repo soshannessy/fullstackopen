@@ -27,7 +27,7 @@ const App = () => {
 
   const addPerson = (name, number) => {
     if (persons.some(person => person.name === name)) {
-      alert(`${name} is already taken`);
+      setNotification({ message: 'Name already taken', type: 'error' });
     } else {
       const personObject = {
         name: name,
