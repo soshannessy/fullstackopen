@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for soshannessy-week3phonebook on 2024-06-11T12:57:56+10:00
+# fly.toml app configuration file generated for soshannessy-week3 on 2024-06-11T16:21:19+10:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'soshannessy-week3phonebook'
+app = 'soshannessy-week3'
 primary_region = 'syd'
 
 [build]

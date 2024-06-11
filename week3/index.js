@@ -1,7 +1,11 @@
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 
-app.use(express.json())
+app.use(express.json());
+
+const cors = require('cors')
+
+app.use(cors())
 
 let persons = [
     { 
@@ -24,7 +28,7 @@ let persons = [
       "name": "Mary Poppendieck", 
       "number": "39-23-6423122"
     }
-]
+];
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -34,9 +38,6 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
-const cors = require('cors')
-app.use(cors())
-
 app.use(express.json())
 app.use(requestLogger)
 
@@ -44,70 +45,70 @@ const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
+app.get('/api/persons/:id', (request, response) => {
+  const id = parseInt(request.params.id, 10);
+  const person = persons.find(person => person.id === id);
+  if (person) {
+    response.json(person);
+  } else {
+    response.status(404).send('Person not found');
+  }
+});
+
+app.get('/', (request, response) => {
+  response.send('<h1>Hello World!</h1>');
+});
+
+app.get('/info', (request, response) => {
+  response.send(`<p>Phone book has info for ${persons.length} people</p><p>${new Date(Date.now()).toString()}</p>`);
+});
+  
+app.get('/api/persons', (request, response) => {
+  response.json(persons);
+});
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = parseInt(request.params.id, 10);
+  persons = persons.filter(person => person.id !== id);
+
+  response.status(204).end();
+});
+
 const generateId = () => {
   const maxId = persons.length > 0
     ? Math.max(...persons.map(n => n.id))
-    : 0
-  return maxId + 1
-}
-
-const isDuplicate = (name, number) => {
-  return persons.some(person => person.name === name || person.number === number)
-}
+    : 0;
+  return maxId + 1;
+};
 
 app.post('/api/persons', (request, response) => {
-  const body = request.body
+  const body = request.body;
 
   if (!body.name || !body.number) {
     return response.status(400).json({ 
       error: 'name or number missing' 
-    })
+    });
   }
 
-  if (isDuplicate(body.name, body.number)) {
+  if (persons.some(person => person.name === body.name)) {
     return response.status(400).json({ 
-      error: 'name or number must be unique' 
-    })
+      error: 'name must be unique' 
+    });
   }
 
   const person = {
     id: generateId(),
     name: body.name,
-    number: body.number
-  }
+    number: body.number,
+  };
 
-  persons = persons.concat(person)
+  persons = persons.concat(person);
 
-  response.json(person)
-})
-
-app.get('/api/persons/:id', (request, response) => {
-  const id = parseInt(request.params.id) 
-  const person = persons.find(person => person.id === id)
-  if (person) {
-    response.send(`<p>Name: ${person.name}</p><p>Number: ${person.number}</p>`)
-  } else {
-    response.status(404).end()
-  }
-})
-
-app.get('/info', (request, response) => {
-  response.send(`<p>The phonebook has info for ${persons.length} people</p><p>${new Date().toString()}</p>`)
-})
-
-app.get('/api/persons', (request, response) => {
-  response.json(persons)
-})
-
-app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  persons = persons.filter(person => person.id !== id)
-
-  response.status(204).end()
-})
+  response.json(person);
+});
 
 app.use(unknownEndpoint)
-
+  
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
