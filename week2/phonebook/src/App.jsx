@@ -1,96 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import personService from './services/person';
-import PersonForm from './components/PersonForm';
+// File: src/App.jsx (or App.js)
+
+import React, { useState } from 'react';
 import Filter from './components/Filter';
 import Persons from './components/Persons';
-import Notification from './components/Notification';
-import './index.css';
+import PersonForm from './components/PersonForm';
 
 const App = () => {
-  const [persons, setPersons] = useState([]);
-  const [searchName, setSearchName] = useState('');
-  const [notification, setNotification] = useState(null);
+  const [persons, setPersons] = useState([
+    { name: 'Arto Hellas', number: '040-1234567', id: 1 }
+  ]);
+  const [newName, setNewName] = useState('');
+  const [newNumber, setNewNumber] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    personService
-      .getAll()
-      .then(initialPersons => {
-        setPersons(initialPersons);
-      })
-      .catch(error => {
-        setNotification({ message: 'Failed to fetch persons', type: 'error' });
-        setTimeout(() => {
-          setNotification(null);
-        }, 5000);
-      });
-  }, []);
+  const addPerson = (event) => {
+    event.preventDefault();
+    const nameExists = persons.some(person => person.name.toLowerCase() === newName.toLowerCase());
 
-  const addPerson = (name, number) => {
-    if (persons.some(person => person.name === name)) {
-      setNotification({ message: 'Name already taken', type: 'error' });
+    if (nameExists) {
+      alert(`${newName} is already added to the phonebook.`);
     } else {
       const personObject = {
-        name: name,
-        number: number,
+        name: newName,
+        number: newNumber,
+        id: persons.length + 1,
       };
 
-      personService
-        .create(personObject)
-        .then(newPerson => {
-          setPersons(persons.concat(newPerson));
-          setNotification({ message: `Added ${newPerson.name}`, type: 'success' });
-          setTimeout(() => {
-            setNotification(null);
-          }, 5000);
-        })
-        .catch(error => {
-          setNotification({ message: 'Failed to add person', type: 'error' });
-          setTimeout(() => {
-            setNotification(null);
-          }, 5000);
-        });
+      setPersons(persons.concat(personObject));
+      setNewName('');
+      setNewNumber('');
+      setErrorMessage('');
     }
   };
 
-  const deletePerson = id => {
-    personService
-      .remove(id)
-      .then(() => {
-        setPersons(persons.filter(person => person.id !== id));
-        setNotification({ message: 'Person deleted', type: 'success' });
-        setTimeout(() => {
-          setNotification(null);
-        }, 5000);
-      })
-      .catch(error => {
-        setNotification({ message: 'Person was already removed from server', type: 'error' });
-        setTimeout(() => {
-          setNotification(null);
-        }, 5000);
-        setPersons(persons.filter(person => person.id !== id));
-      });
+  const handleNameChange = (event) => {
+    setNewName(event.target.value);
   };
 
-  const handleSearchChange = event => {
-    setSearchName(event.target.value);
+  const handleNumberChange = (event) => {
+    setNewNumber(event.target.value);
   };
 
-  const peopleToShow = searchName
-    ? persons.filter(person => person.name.toLowerCase().includes(searchName.toLowerCase()))
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const personsToShow = searchTerm
+    ? persons.filter(person =>
+        person.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
     : persons;
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification notification={notification} />
-      <Filter value={searchName} onChange={handleSearchChange} />
-      <h3>Add a new</h3>
-      <PersonForm addPerson={addPerson} />
+      <div>
+        <Filter value={searchTerm} onChange={handleSearchChange} />
+      </div>
+      <h2>Add a new</h2>
+      <PersonForm
+        onSubmit={addPerson}
+        newName={newName}
+        handleNameChange={handleNameChange}
+        newNumber={newNumber}
+        handleNumberChange={handleNumberChange}
+      />
       <h2>Numbers</h2>
-      <Persons people={peopleToShow} onDelete={deletePerson} />
+      <Persons personsToShow={personsToShow} />
     </div>
   );
 };
 
 export default App;
-

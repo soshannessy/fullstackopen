@@ -1,28 +1,33 @@
-import React, { useState } from 'react';
+import React from "react";
 
-const PersonForm = ({ addPerson }) => {
-  const [newName, setNewName] = useState('');
-  const [newNumber, setNewNumber] = useState('');
-
-  const handleNameChange = event => setNewName(event.target.value);
-  const handleNumberChange = event => setNewNumber(event.target.value);
-
-  const handleSubmit = event => {
-    event.preventDefault();
-    addPerson(newName, newNumber);
-    setNewName('');
-    setNewNumber('');
-  };
-
+const PersonForm = ({ onSubmit, newName, handleNameChange, newNumber, handleNumberChange }) => {
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onSubmit}>
       <div>
-        name: <input value={newName} onChange={handleNameChange} />
+        <label>
+          Name: 
+          <input 
+            type="text"
+            value={newName} 
+            onChange={handleNameChange} 
+            placeholder="Enter name"
+            required
+          />
+        </label>
+        <br />
+        <label>
+          Phone: 
+          <input 
+            type="text"
+            value={newNumber} 
+            onChange={handleNumberChange} 
+            placeholder="Enter phone number"
+            required
+          />
+        </label>
+        <br />
+        <button type="submit">Add</button>
       </div>
-      <div>
-        number: <input value={newNumber} onChange={handleNumberChange} />
-      </div>
-      <button type="submit">add</button>
     </form>
   );
 };

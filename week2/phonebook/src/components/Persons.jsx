@@ -1,13 +1,15 @@
-const Persons = ({ people, onDelete }) => (
-  <ul>
-    {people.map(person => (
-      <li key={person.id}>
-        {person.name} {person.number}
-        <button onClick={() => onDelete(person.id)}>delete</button>
-      </li>
-    ))}
-  </ul>
-);
+import React from "react";
+
+const Persons = ({ personsToShow }) => {
+  return (
+    <ul>
+      {personsToShow.map(person => (
+        <li key={person.id}>
+          {person.name} {person.number}
+        </li>
+      ))}
+    </ul>
+  );
+};
 
 export default Persons;
-
