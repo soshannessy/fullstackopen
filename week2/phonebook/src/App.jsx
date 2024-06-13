@@ -1,20 +1,32 @@
-// File: src/App.jsx (or App.js)
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Filter from './components/Filter';
 import Persons from './components/Persons';
 import PersonForm from './components/PersonForm';
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-1234567', id: 1 }
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        setErrorMessage('Failed to fetch data from the server.');
+      });
+  }, []); // Empty dependency array means this effect runs once on component mount
 
   const addPerson = (event) => {
     event.preventDefault();
+
+    // Check if the person with newName already exists
     const nameExists = persons.some(person => person.name.toLowerCase() === newName.toLowerCase());
 
     if (nameExists) {
@@ -23,13 +35,20 @@ const App = () => {
       const personObject = {
         name: newName,
         number: newNumber,
-        id: persons.length + 1,
       };
 
-      setPersons(persons.concat(personObject));
-      setNewName('');
-      setNewNumber('');
-      setErrorMessage('');
+      // Send POST request to add new person to the server
+      axios
+        .post('http://localhost:3001/persons', personObject)
+        .then(response => {
+          setPersons(persons.concat(response.data));
+          setNewName('');
+          setNewNumber('');
+        })
+        .catch(error => {
+          console.error('Error adding person:', error);
+          setErrorMessage('Failed to add person.');
+        });
     }
   };
 
