@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Filter from './components/Filter';
 import Persons from './components/Persons';
 import PersonForm from './components/PersonForm';
+import personsService from './services/persons';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -12,21 +12,19 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data);
+    personsService.getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons);
       })
       .catch(error => {
         console.error('Error fetching data:', error);
         setErrorMessage('Failed to fetch data from the server.');
       });
-  }, []); // Empty dependency array means this effect runs once on component mount
+  }, []);
 
   const addPerson = (event) => {
     event.preventDefault();
 
-    // Check if the person with newName already exists
     const nameExists = persons.some(person => person.name.toLowerCase() === newName.toLowerCase());
 
     if (nameExists) {
@@ -37,11 +35,9 @@ const App = () => {
         number: newNumber,
       };
 
-      // Send POST request to add new person to the server
-      axios
-        .post('http://localhost:3001/persons', personObject)
-        .then(response => {
-          setPersons(persons.concat(response.data));
+      personsService.create(personObject)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson));
           setNewName('');
           setNewNumber('');
         })
@@ -62,6 +58,17 @@ const App = () => {
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
+  };
+
+  const deletePerson = (id) => {
+    personsService.remove(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id));
+      })
+      .catch(error => {
+        console.error('Error deleting person:', error);
+        setErrorMessage('Failed to delete person.');
+      });
   };
 
   const personsToShow = searchTerm
@@ -85,7 +92,11 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons personsToShow={personsToShow} />
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      <Persons
+        personsToShow={personsToShow}
+        onDelete={deletePerson}
+      />
     </div>
   );
 };
