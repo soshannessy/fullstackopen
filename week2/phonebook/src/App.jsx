@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Filter from './components/Filter';
 import Persons from './components/Persons';
 import PersonForm from './components/PersonForm';
+import Notification from './components/Notification';
 import personsService from './services/persons';
 
 const App = () => {
@@ -18,7 +19,10 @@ const App = () => {
       })
       .catch(error => {
         console.error('Error fetching data:', error);
-        setErrorMessage('Failed to fetch data from the server.');
+        setErrorMessage('Error fetching data');
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
       });
   }, []);
 
@@ -40,6 +44,10 @@ const App = () => {
           setPersons(persons.concat(returnedPerson));
           setNewName('');
           setNewNumber('');
+          setErrorMessage(`Added ${returnedPerson.name}`);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
         })
         .catch(error => {
           console.error('Error adding person:', error);
@@ -64,6 +72,10 @@ const App = () => {
     personsService.remove(id)
       .then(() => {
         setPersons(persons.filter(person => person.id !== id));
+        setErrorMessage('Person deleted successfully');
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
       })
       .catch(error => {
         console.error('Error deleting person:', error);
@@ -79,10 +91,12 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
+      <h1>Phonebook</h1>
+      {errorMessage && <Notification message={errorMessage} type="success" />}
       <div>
         <Filter value={searchTerm} onChange={handleSearchChange} />
       </div>
+      
       <h2>Add a new</h2>
       <PersonForm
         onSubmit={addPerson}
@@ -91,12 +105,9 @@ const App = () => {
         newNumber={newNumber}
         handleNumberChange={handleNumberChange}
       />
+      
       <h2>Numbers</h2>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      <Persons
-        personsToShow={personsToShow}
-        onDelete={deletePerson}
-      />
+      <Persons personsToShow={personsToShow} onDelete={deletePerson} />
     </div>
   );
 };
