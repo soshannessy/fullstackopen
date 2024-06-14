@@ -4,8 +4,6 @@ require('dotenv').config();
 
 const Person = require('./models/person');
 
-let persons = []
-
 app.use(express.static('dist'))
 
 const requestLogger = (request, response, next) => {
