@@ -73,6 +73,22 @@ test('blog without a title is not added', async () => {
     assert.strictEqual(response.body.length, helper.initialBlogs.length)
   });
 
+  test('blog without url is not added', async () => {
+    const newBlog = {
+      title: 'Blog without url',
+      author: 'Author6',
+      likes: 5
+    };
+  
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400);
+  
+    const response = await api.get('/api/blogs');
+    assert.strictEqual(response.body.length, helper.initialBlogs.length);
+  });
+  
 test('a specific blog can be viewed', async () => {
   const blogsAtStart = await helper.blogsInDb()
 
