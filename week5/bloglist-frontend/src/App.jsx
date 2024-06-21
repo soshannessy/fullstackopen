@@ -1,16 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login';
+import LoginForm from './components/Login'
+import BlogForm from './components/Form'
+import Togglable from './components/Togglable.jsx'
+import './style.css';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState(''); 
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setUrl] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const blogFormRef = useRef();
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -41,9 +44,10 @@ const App = () => {
       setUser(user);
       setUsername('');
       setPassword('');
+      setLoginError(''); 
     } catch (exception) {
       console.error('Wrong credentials:', exception);
-      // Handle error state or feedback to the user
+      setLoginError('Invalid username or password'); 
     }
   };
 
@@ -52,79 +56,45 @@ const App = () => {
     setUser(null);
   };
 
-  const handleBlogSubmit = async (event) => {
-    event.preventDefault();
-
-    try {
-      const newBlog = await blogService.create({
-        title, author, url
+  const addBlog = (blogObject) => {
+    blogFormRef.current.toggleVisibility();
+    blogService
+      .create(blogObject)
+      .then(returnedBlog => {
+        setBlogs(blogs.concat(returnedBlog))
       });
+  };
 
-      setBlogs([...blogs, newBlog]);
-      setTitle('');
-      setAuthor('');
-      setUrl('');
-    } catch (exception) {
-      console.error('Error creating blog:', exception);
-      // Handle error state or feedback to the user
+  const updateBlog = async (blog) => {
+    try {
+      const updatedBlog = await blogService.update(blog.id, blog);
+      const updatedBlogs = blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b);
+      setBlogs(updatedBlogs.sort((a, b) => b.likes - a.likes));
+    } catch (err) {
+      console.error('Updating blog failed:', err);
+      // Handle error if necessary
     }
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-        <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>      
+  const blogForm = () => (
+    <Togglable buttonLabelOpen='new blog' buttonLabelClose='Cancel' ref={blogFormRef}>
+      <BlogForm createBlog={addBlog} />
+    </Togglable>
   );
 
-  const blogForm = () => (
-    <form onSubmit={handleBlogSubmit}>
-      <div>
-        title
-        <input
-          type="text"
-          value={title}
-          name="Title"
-          onChange={({ target }) => setTitle(target.value)}
+  const loginForm = () => (
+    <div>
+      <Togglable buttonLabelOpen='login' buttonLabelClose='Cancel'>
+        <LoginForm
+          username={username}
+          password={password}
+          handleUsernameChange={({ target }) => setUsername(target.value)}
+          handlePasswordChange={({ target }) => setPassword(target.value)}
+          handleSubmit={handleLogin}
         />
-      </div>
-      <div>
-        author
-        <input
-          type="text"
-          value={author}
-          name="Author"
-          onChange={({ target }) => setAuthor(target.value)}
-        />
-      </div>
-      <div>
-        url
-        <input
-          type="text"
-          value={url}
-          name="Url"
-          onChange={({ target }) => setUrl(target.value)}
-        />
-      </div>
-      <button type="submit">Create</button>
-    </form>      
+      </Togglable>
+      {loginError && <div className='error'>{loginError}</div>}
+    </div>
   );
 
   if (user === null) {
@@ -135,7 +105,7 @@ const App = () => {
       </div>
     );
   }
-  
+
   return (
     <>
       <div>
@@ -143,12 +113,14 @@ const App = () => {
         <p>{user.username} logged-in <button onClick={handleLogout}>Logout</button></p>
         {blogs
           .filter(blog => blog.authorId === user.userId)
+          .sort((a, b) => (b.likes || 0) - (a.likes || 0))
           .map(blog => (
-            <Blog key={blog.id} blog={blog} />
+            <div key={blog.id}>
+              <Blog blog={blog} updateBlog={updateBlog} />
+            </div>
           ))}
       </div>
       <div>
-        <h2>create new</h2>
         {blogForm()}
       </div>
     </>
