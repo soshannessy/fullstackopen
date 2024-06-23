@@ -19,18 +19,18 @@ blogsRouter.get('/', async (request, response) => {
 module.exports = blogsRouter
 
 blogsRouter.put('/:id', async (request, response) => {
-  const body = request.body
+  const body = request.body;
 
   const blog = {
     title: body.title,
     author: body.author,
     url: body.url,
     likes: body.likes
-  }
+  };
 
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-  response.json(updatedBlog)
-})
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true }).populate('user');
+  response.json(updatedBlog.toJSON());
+});
 
 blogsRouter.post('/', async (request, response) => {
   const body = request.body
