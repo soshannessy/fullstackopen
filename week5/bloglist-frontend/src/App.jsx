@@ -100,34 +100,35 @@ const App = () => {
     </div>
   )
 
-  if (user === null) {
-    return (
-      <div>
-        <h2>Log in to application</h2>
-        {loginForm()}
-      </div>
-    )
-  }
-
   return (
-    <>
-      <div>
-        <h2>blogs</h2>
-        <p>{user.username} logged-in <button onClick={handleLogout}>Logout</button></p>
-        {blogs
-          .filter(blog => blog.authorId === user.userId)
-          .sort((a, b) => (b.likes || 0) - (a.likes || 0))
-          .map(blog => (
-            <div key={blog.id}>
-              <Blog blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />
-            </div>
-          ))}
-      </div>
-      <div>
-        {blogForm()}
-      </div>
-    </>
-  )
+    <div>
+      {user === null ? (
+        <>
+          <h2>Log in to application</h2>
+          {loginForm()}
+        </>
+      ) : (
+        <>
+          <h2>blogs</h2>
+          <p>{user.username} logged-in <button onClick={handleLogout}>Logout</button></p>
+        </>
+      )}
+  
+      {blogs
+        .sort((a, b) => (b.likes || 0) - (a.likes || 0))
+        .map(blog => (
+          <div key={blog.id}>
+            <Blog blog={blog} updateBlog={user ? updateBlog : null} deleteBlog={user ? deleteBlog : null} />
+          </div>
+        ))}
+  
+      {user && blogForm()}
+  
+      <p>Blog app, Department of Computer Science, University of Helsinki 2024</p>
+    </div>
+  );  
 }
+
+
 
 export default App
