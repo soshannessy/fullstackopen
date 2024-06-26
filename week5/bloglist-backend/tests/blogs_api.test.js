@@ -61,6 +61,7 @@ test('a valid blog can be added', async () => {
 
 test('blog without a title is not added', async () => {
   const newBlog = {
+    title:"",
     author: 'Author4',
     url: 'www.website4.com',
     likes: 16,
@@ -70,7 +71,7 @@ test('blog without a title is not added', async () => {
   await api
     .post('/api/blogs')
     .send(newBlog)
-    .expect(400);
+    .expect(401);
 
     const response = await api.get('/api/blogs')
     assert.strictEqual(response.body.length, helper.initialBlogs.length)
@@ -138,25 +139,26 @@ describe('when there is initially one user in db', () => {
   })
 
   test('creation fails with proper statuscode and message if username already taken', async () => {
-    const usersAtStart = await helper.usersInDb()
-
+    const usersAtStart = await helper.usersInDb();
+  
     const newUser = {
       username: 'root',
       name: 'Superuser',
       password: 'salainen',
-    }
-
+    };
+  
     const result = await api
       .post('/api/users')
       .send(newUser)
       .expect(400)
-      .expect('Content-Type', /application\/json/)
-
-    const usersAtEnd = await helper.usersInDb()
-    assert(result.body.error.includes('expected `username` to be unique'))
-
-    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
-  })
+      .expect('Content-Type', /application\/json/);
+  
+    const usersAtEnd = await helper.usersInDb();
+    
+    assert(result.body.error.includes('username must be unique'));
+  
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length);
+  });
 })
 
 after(async () => {

@@ -1,9 +1,9 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2NjczYjI0Y2FiNjE1ODI0ZWQ2NWI3ODYiLCJpYXQiOjE3MTg4NjQxODgsImV4cCI6MTcxODg2Nzc4OH0.gPS4FSUxcYpO-K2-xvMcxCIn8FG2zvROeGtCBOJjkqw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2NjdiYjgxMmYxZjQ1N2Y3MjdmMzRmOTciLCJpYXQiOjE3MTkzODQwODksImV4cCI6MTcxOTM4NzY4OX0.m1CrQVZk9jsY4asgmx7Offhf0fbqVYDXLow5GA8CqOw
 
 {
-  "title": "This is the second blog",
+  "title": "",
   "author": "Second Blog",
   "url": "www.website.com",
   "likes": 6,
